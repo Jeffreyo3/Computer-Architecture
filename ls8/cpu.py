@@ -7,7 +7,16 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.ram = [0] * 256
+        self.reg = [0] * 8
+        self.pc = 0
+        self.running = True
+        self.instruction = {
+            0b00000001: self.hlt,
+            0b10000010: self.ldi,
+            0b01000111: self.prn,
+            0b10100010: self.mul
+        }
 
     def load(self):
         """Load a program into memory."""
@@ -18,7 +27,7 @@ class CPU:
 
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8
+            0b10000010, # LDI R0, 8
             0b00000000,
             0b00001000,
             0b01000111, # PRN R0
@@ -29,7 +38,26 @@ class CPU:
         for instruction in program:
             self.ram[address] = instruction
             address += 1
+    
+    def ram_read(self, address):
+        return self.ram[address]
 
+    def ram_write(self, value, address):
+        self.ram[address] = value
+
+    def hlt(self, operand_a, operand_b):
+        return(0, False)
+
+    def ldi(self, operand_a, operand_b):
+        self.reg[operand_a] = operand_b
+        return(3, True)
+    
+    def prn(self, operand_a, operand_b):
+        print(self.reg[operand_a])
+        return(2, True)
+
+    def mul(self, operand_a, operand_b):
+        return(3, True)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -62,4 +90,21 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        
+        while self.running:
+            IR = self.ram[self.pc]
+
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+
+            try:
+                operation = self.instruction[IR](operand_a, operand_b)
+                self.running = operation[1]
+                self.pc += operation[0]
+
+            except:
+                print(f"Unknown command: {IR}")
+                sys.exit()
+
+
+# // need load
