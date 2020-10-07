@@ -18,22 +18,35 @@ class CPU:
             0b10100010: self.mul
         }
 
-    def load(self):
+    def load(self, program):
         """Load a program into memory."""
 
         address = 0
 
         # For now, we've just hardcoded a program:
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0, 8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
+        
+        with open(program) as f: 
+            for line in f:
+                possible_num = line[:line.find("#")]
+                if possible_num == "":
+                    continue # skil to next iteration of loop
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0, 8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+                try:
+                    self.ram_write(int(possible_num, 2), address)
+                    address += 1
+
+                except FileNotFoundError:
+                    print(f'Error: {program} not found')
+
 
         for instruction in program:
             self.ram[address] = instruction
@@ -57,6 +70,7 @@ class CPU:
         return(2, True)
 
     def mul(self, operand_a, operand_b):
+        self.alu("MUL", operand_a, operand_b)
         return(3, True)
 
     def alu(self, op, reg_a, reg_b):
@@ -64,7 +78,12 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        elif op == "SUB":
+            self.reg[reg_a] -= self.reg[reg_b]
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
+        elif op == "DIV":
+            self.reg[reg_a] /= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
