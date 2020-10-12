@@ -25,15 +25,52 @@
 
 ### Day 3: Stack
 
-- [ ] Implement the System Stack and be able to run the `stack.ls8` program
+- [x] Implement the System Stack and be able to run the `stack.ls8` program
 
 ### Day 4: Get `call.ls8` running
 
-- [ ] Implement the CALL and RET instructions
-- [ ] Implement Subroutine Calls and be able to run the `call.ls8` program
+- [x] Implement the CALL and RET instructions
+- [x] Implement Subroutine Calls and be able to run the `call.ls8` program
 
 ### Stretch
 
 - [ ] Add the timer interrupt to the LS-8 emulator
 - [ ] Add the keyboard interrupt to the LS-8 emulator
 - [ ] Write an LS-8 assembly program to draw a curved histogram on the screen
+
+## SPRINT CHALLENGE: Minimum Viable Product
+
+Your finished project must include all of the following requirements:
+
+- [x] Add the `CMP` instruction and `equal` flag to your LS-8.
+
+- [x] Add the `JMP` instruction.
+
+- [x] Add the `JEQ` and `JNE` instructions.
+
+[See the LS-8 spec for details](https://github.com/LambdaSchool/Computer-Architecture/blob/master/LS8-spec.md)
+
+In your solution, it is essential that you follow best practices and produce
+clean and professional results. Schedule time to review, refine, and assess your
+work and perform basic professional polishing including spell-checking and
+grammar-checking on your work. It is better to submit a challenge that meets MVP
+than one that attempts too much and does not.
+
+Validate your work through testing and ensure that your code operates as designed.
+
+[Here is some code](./ls8/examples/sctest.ls8) that exercises the above instructions. It should
+print:
+
+```
+1
+4
+5
+```
+
+```
+# Code to test the Sprint Challenge
+#
+# Expected output:
+# 1
+# 4
+# 5

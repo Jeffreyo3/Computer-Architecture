@@ -7,15 +7,29 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
+        self.running = True
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0
-        self.running = True
+        self.SP = 7
+        self.fl = 5
+        self.l = 0
+        self.g = 0
+        self.e = 0
         self.instruction = {
             0b00000001: self.hlt,
             0b10000010: self.ldi,
             0b01000111: self.prn,
-            0b10100010: self.mul
+            0b10100010: self.mul,
+            0b01000101: self.push,
+            0b01000110: self.pop,
+            0b10100000: self.add,
+            0b01010000: self.call,
+            0b00010001: self.ret,
+            0b10100111: self.cmp,
+            0b01010100: self.jmp,
+            0b01010101: self.jeq,
+            0b01010110: self.jne
         }
 
     def load(self, program):
@@ -59,7 +73,7 @@ class CPU:
         self.ram[address] = value
 
     def hlt(self, operand_a, operand_b):
-        return(0, False)
+        return(1, False)
 
     def ldi(self, operand_a, operand_b):
         self.reg[operand_a] = operand_b
@@ -73,9 +87,62 @@ class CPU:
         self.alu("MUL", operand_a, operand_b)
         return(3, True)
 
+    def add(self, operand_a, operand_b):
+        self.alu('ADD', operand_a, operand_b)
+        return (3, True)
+
+    def divide(self, operand_a, operand_b):
+        self.alu('DIV', operand_a, operand_b)
+        return (3, True)
+
+    def subtract(self, operand_a, operand_b):
+        self.alu('SUB', operand_a, operand_b)
+        return (3, True)
+    
+    def push(self, operand_a, operand_b):
+        self.reg[self.SP] -= 1
+        self.ram[self.reg[self.SP]] = self.reg[operand_a]
+        return (2, True)
+
+    def pop(self, operand_a, operand_b):
+        self.reg[operand_a] = self.ram[self.reg[self.SP]]
+        self.reg[self.SP] += 1
+        return (2, True)
+
+    def call(self, operand_a, operand_b):
+        self.SP -= 1
+        self.ram[self.SP] = self.pc + 2
+        self.pc = self.reg[operand_a]
+        return (0, True)
+
+    def ret(self, operand_a, operand_b):
+        self.pc = self.ram[self.SP]
+        return (0, True)
+    
+    def jmp(self, operand_a, operand_b):
+        self.pc = self.reg[operand_a]
+        return (0, True)
+
+    def jeq(self, operand_a, operand_b):
+        if self.e == 1:
+            self.pc = self.reg[operand_a]
+            return (0, True)
+        else:
+            return (2, True)
+
+    def jne(self, operand_a, operand_b):
+        if self.e == 0:
+            self.pc = self.reg[operand_a]
+            return (0, True)
+        else:
+            return(2, True)
+
+    def cmp(self, operand_a, operand_b):
+        self.alu("CMP", operand_a, operand_b)
+        return (3, True)
+
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         elif op == "SUB":
@@ -84,6 +151,19 @@ class CPU:
             self.reg[reg_a] *= self.reg[reg_b]
         elif op == "DIV":
             self.reg[reg_a] /= self.reg[reg_b]
+        elif op == "CMP":
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.e = 1
+                self.l = 0
+                self.g = 0
+            elif self.reg[reg_a] <= self.reg[reg_b]:
+                self.e = 0
+                self.l = 1
+                self.g = 0
+            else:
+                self.e = 0
+                self.l = 0
+                self.g = 1
         else:
             raise Exception("Unsupported ALU operation")
 
